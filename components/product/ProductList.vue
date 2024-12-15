@@ -16,6 +16,16 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+  Pagination,
+  PaginationEllipsis,
+  PaginationFirst,
+  PaginationLast,
+  PaginationList,
+  PaginationListItem,
+  PaginationNext,
+  PaginationPrev,
+} from "@/components/ui/pagination";
 
 const {
   products,
@@ -32,6 +42,9 @@ const {
 const { showSuccess, showError } = useNotification();
 
 const searchQuery = ref("");
+const currentPage = ref(1);
+const itemsPerPage = 10;
+
 const filteredProducts = computed(() => {
   if (!searchQuery.value) return products.value;
 
@@ -41,6 +54,20 @@ const filteredProducts = computed(() => {
     (product) =>
       product.title.toLowerCase().includes(query) || product.category.toLowerCase().includes(query),
   );
+});
+
+// find out how much pages are there based on the products length
+const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage));
+
+const paginatedProducts = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return filteredProducts.value.slice(start, end);
+});
+
+// reset to page 1 when search query changes
+watch(searchQuery, () => {
+  currentPage.value = 1;
 });
 
 const handleDelete = async () => {
@@ -82,7 +109,7 @@ onMounted(() => {
       </TableHeader>
 
       <TableBody>
-        <TableRow v-for="product in filteredProducts" :key="product.id">
+        <TableRow v-for="product in paginatedProducts" :key="product.id">
           <TableCell>{{ product.title }}</TableCell>
           <TableCell>${{ product.price }}</TableCell>
           <TableCell>{{ product.category }}</TableCell>
@@ -100,6 +127,47 @@ onMounted(() => {
         </TableRow>
       </TableBody>
     </Table>
+
+    <div v-if="totalPages > 1" class="flex justify-center">
+      <Pagination class="flex items-center gap-1">
+        <PaginationFirst
+          class="h-9 w-9 rounded-md border border-input bg-background p-0 hover:bg-accent hover:text-accent-foreground"
+          :disabled="currentPage === 1"
+          @click="currentPage = 1"
+        />
+        <PaginationPrev
+          class="h-9 w-9 rounded-md border border-input bg-background p-0 hover:bg-accent hover:text-accent-foreground"
+          :disabled="currentPage === 1"
+          @click="currentPage--"
+        />
+
+        <PaginationList class="flex items-center gap-1">
+          <PaginationListItem v-for="page in totalPages" :key="page" :value="String(page)">
+            <button
+              class="h-9 w-9 rounded-md border border-input bg-background p-0 hover:bg-accent hover:text-accent-foreground"
+              :class="{
+                'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground':
+                  currentPage === page,
+              }"
+              @click="currentPage = page"
+            >
+              {{ page }}
+            </button>
+          </PaginationListItem>
+        </PaginationList>
+
+        <PaginationNext
+          class="h-9 w-9 rounded-md border border-input bg-background p-0 hover:bg-accent hover:text-accent-foreground"
+          :disabled="currentPage === totalPages"
+          @click="currentPage++"
+        />
+        <PaginationLast
+          class="h-9 w-9 rounded-md border border-input bg-background p-0 hover:bg-accent hover:text-accent-foreground"
+          :disabled="currentPage === totalPages"
+          @click="currentPage = totalPages"
+        />
+      </Pagination>
+    </div>
 
     <Dialog :open="!!productToDelete" @update:open="cancelDelete">
       <DialogContent>
