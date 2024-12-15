@@ -31,6 +31,18 @@ const {
 
 const { showSuccess, showError } = useNotification();
 
+const searchQuery = ref("");
+const filteredProducts = computed(() => {
+  if (!searchQuery.value) return products.value;
+
+  // change query to lowercase so that the search is case-insensitive
+  const query = searchQuery.value.toLowerCase();
+  return products.value.filter(
+    (product) =>
+      product.title.toLowerCase().includes(query) || product.category.toLowerCase().includes(query),
+  );
+});
+
 const handleDelete = async () => {
   try {
     await deleteProduct();
@@ -46,7 +58,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
+  <div class="space-y-4">
+    <div class="flex items-center space-x-2">
+      <Input v-model="searchQuery" placeholder="Search by title or category..." class="max-w-sm">
+        <template #prefix>
+          <span class="i-lucide-search h-4 w-4 text-muted-foreground" />
+        </template>
+      </Input>
+    </div>
+
     <div v-if="error" class="text-red-500 mb-4">Error loading products: {{ error.message }}</div>
 
     <ProductListSkeleton v-if="isLoading" />
@@ -62,7 +82,7 @@ onMounted(() => {
       </TableHeader>
 
       <TableBody>
-        <TableRow v-for="product in products" :key="product.id">
+        <TableRow v-for="product in filteredProducts" :key="product.id">
           <TableCell>{{ product.title }}</TableCell>
           <TableCell>${{ product.price }}</TableCell>
           <TableCell>{{ product.category }}</TableCell>
@@ -74,6 +94,9 @@ onMounted(() => {
               Delete
             </Button>
           </TableCell>
+        </TableRow>
+        <TableRow v-if="filteredProducts.length === 0">
+          <TableCell colspan="4" class="h-24 text-center"> No products found. </TableCell>
         </TableRow>
       </TableBody>
     </Table>
