@@ -29,6 +29,17 @@ const {
   deleteProduct,
 } = useProducts();
 
+const { showSuccess, showError } = useNotification();
+
+const handleDelete = async () => {
+  try {
+    await deleteProduct();
+    showSuccess("Product deleted successfully");
+  } catch (error) {
+    showError("Failed to delete product");
+  }
+};
+
 onMounted(() => {
   fetchProducts();
 });
@@ -57,7 +68,7 @@ onMounted(() => {
           <TableCell>{{ product.category }}</TableCell>
           <TableCell class="text-right space-x-2">
             <Button variant="ghost" size="sm" asChild>
-              <NuxtLink :to="`/products/${product.id}`">Edit</NuxtLink>
+              <NuxtLink :to="`/products/edit/${product.id}`">Edit</NuxtLink>
             </Button>
             <Button variant="destructive" size="sm" @click="confirmDelete(product)">
               Delete
@@ -77,7 +88,7 @@ onMounted(() => {
         </DialogHeader>
         <DialogFooter>
           <Button variant="ghost" @click="cancelDelete">Cancel</Button>
-          <Button variant="destructive" :disabled="isDeleting" @click="deleteProduct">
+          <Button variant="destructive" :disabled="isDeleting" @click="handleDelete">
             {{ isDeleting ? "Deleting..." : "Delete" }}
           </Button>
         </DialogFooter>
