@@ -1,3 +1,19 @@
+/**
+ * Product management composable
+ * @returns {Object} An object containing product state and methods
+ * @example
+ * const {
+ *   products,
+ *   isLoading,
+ *   fetchProducts
+ * } = useProducts()
+ *
+ * // Fetch products on component mount
+ * onMounted(() => {
+ *   fetchProducts()
+ * })
+ */
+
 import { productAPI } from "~/services/product/product.api";
 import type { IProduct } from "~/types/IProduct";
 

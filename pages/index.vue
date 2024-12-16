@@ -1,6 +1,6 @@
 <script setup>
 import { Button } from "@/components/ui/button";
-import ProductList from "@/components/product/ProductList.vue";
+import ProductTable from "@/components/product/ProductTable.vue";
 </script>
 
 <template>
@@ -12,6 +12,6 @@ import ProductList from "@/components/product/ProductList.vue";
       </NuxtLink>
     </div>
 
-    <ProductList />
+    <ProductTable />
   </div>
 </template>
